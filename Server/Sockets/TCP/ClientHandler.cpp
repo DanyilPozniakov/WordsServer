@@ -2,11 +2,25 @@
 // Created by pozni on 3/16/2025.
 //
 
+#include <mutex>
+#include <condition_variable>
 #include <iostream>
 #include "ClientHandler.h"
+#include "../TaskManager.h"
 
-ClientHandler::ClientHandler()
+namespace
 {
+std::mutex m_receivedDataMutex;
+std::mutex m_dataToSendMutex;
+std::condition_variable m_receivedDataCV;
+std::condition_variable m_dataToSendCV;
+}
+
+
+ClientHandler::ClientHandler(TaskManager* taskManager)
+    : m_taskManager(taskManager)
+{
+    taskManager->AddConnection(this);
 }
 
 ClientHandler::~ClientHandler()
@@ -34,12 +48,10 @@ void ClientHandler::HandleRead(SOCKET socket, ISocket* reactor)
     }
     else if (result > 0)
     {
-        m_readBuffer[result] = '\0';
         std::string data(m_readBuffer.data(), result);
         {
-            std::cout << "[CLIENT HANDLER] HandleRead() -> received data: " << data << std::endl;
-            // std::lock_guard<std::mutex> lock(m_mutex);
-            // m_queue.push(data);
+            std::lock_guard lock(m_receivedDataMutex);
+            m_receivedData.push(data);
         }
     }
     // PUSH TO PARSER AND QUEUE
@@ -47,6 +59,19 @@ void ClientHandler::HandleRead(SOCKET socket, ISocket* reactor)
 
 void ClientHandler::HandleWrite(SOCKET socket, ISocket* reactor)
 {
+    if(HasDataToSend())
+    {
+        std::string data = GetDataToSend();
+        int result = send(socket, data.c_str(), data.size(), 0);
+        if (result == SOCKET_ERROR)
+        {
+            std::cerr << "[CLIENT HANDLER] HandleWrite() -> send failed with error: " << WSAGetLastError() << std::endl;
+        }
+        else if(result > 0)
+        {
+            std::cout << "[CLIENT HANDLER] HandleWrite() -> sent " << result << " bytes" << std::endl;
+        }
+    }
 }
 
 void ClientHandler::HandleError(SOCKET socket, ISocket* reactor)
@@ -56,7 +81,46 @@ void ClientHandler::HandleError(SOCKET socket, ISocket* reactor)
 
 bool ClientHandler::HasDataToSend()
 {
-    return false;
+    return !m_dataToSend.empty();
+}
+
+bool ClientHandler::HasDataToParse()
+{
+    return !m_receivedData.empty();
+}
+
+void ClientHandler::AddDataToSend(std::string data)
+{
+    std::lock_guard lock(m_dataToSendMutex);
+    m_dataToSend.push(std::move(data));
+}
+
+std::string ClientHandler::GetDataToSend()
+{
+    std::string data;
+    {
+        std::lock_guard lock(m_dataToSendMutex);
+        if (!m_dataToSend.empty())
+        {
+            data = m_dataToSend.front();
+            m_dataToSend.pop();
+        }
+    }
+    return data;
+}
+
+std::string ClientHandler::GetDataToParse()
+{
+    std::string data;
+    {
+        std::lock_guard lock(m_receivedDataMutex);
+        if (!m_receivedData.empty())
+        {
+            data = m_receivedData.front();
+            m_receivedData.pop();
+        }
+    }
+    return data;
 }
 
 void ClientHandler::SetBufferSizes(int readSize, int writeSize)

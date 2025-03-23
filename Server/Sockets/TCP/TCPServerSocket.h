@@ -12,20 +12,42 @@
 #include <utility>
 #include <map>
 #include <vector>
+#include <memory>
 
 #include <IEventHandler.h>
 #include <ServerHandler.h>
 #include <ISocket.h>
+#include <unordered_map>
+#include <unordered_set>
+
+#include "ISocket.h"
+
+// class TaskManager;
+class IEventHandler;
+class WordsServer;
+
+
+class Connection
+{
+public:
+    Connection(SOCKET socket, IEventHandler* handler, TaskManager* taskManager);
+    virtual ~Connection();
+
+
+    SOCKET m_socket;
+    std::unique_ptr<IEventHandler> m_handler;
+    std::string m_clientName;
+};
 
 
 class TCPServerSocket : public ISocket
 {
 public:
-    explicit TCPServerSocket(const std::string& ip, const std::string& port);
+    explicit TCPServerSocket(const std::string& ip, const std::string& port, WordsServer* server);
     ~TCPServerSocket() override;
 
-    bool Initialize()                   override;
-    void Close()                        override;
+    bool Initialize() override;
+    void Close() override;
 
     void SetTimeout(int milliseconds) const;
     void RegisterHandler(SOCKET socket, IEventHandler* handler) override;
@@ -38,18 +60,21 @@ public:
     void eventLoop();
     std::atomic<bool> m_isRunning = false;
 
+
+    // struct ConnectHash
+    // {
+    //     size_t operator()(const Connection& connection) const
+    //     {
+    //         return std::hash<std::string>()(std::to_string(connection.m_socket));
+    //     }
+    // };
+
 private:
-    std::pair<SOCKET, ServerHandler*>   m_listener;
-    std::map<SOCKET, IEventHandler*>    m_clientSockets; // maybe change to std::unordered_map
+    std::pair<SOCKET, std::unique_ptr<ServerHandler>> m_listener;
+    std::map<SOCKET,IEventHandler*> m_clientSockets; // maybe change to std::unordered_map
 
+    WordsServer* m_server;
 
-
-
-
-
-
-
-    // void redirectToLogger(ILogger* logger, const std::string& message) const;
 };
 
 

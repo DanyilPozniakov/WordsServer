@@ -3,12 +3,16 @@ add_library(Server STATIC
         WordsServer.h
         ThreadPool.cpp
         ThreadPool.h
+        TaskManager.cpp
+        TaskManager.h
 
 )
 
 target_include_directories(Server PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}
+        ${CMAKE_CURRENT_SOURCE_DIR}/Sockets
 )
+
 
 
 target_link_libraries(Server PUBLIC

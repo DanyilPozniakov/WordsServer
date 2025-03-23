@@ -19,7 +19,7 @@ public:
     void RunThreads();
     void Shutdown();
 
-    void AddTask(std::function<void()> task);
+
 
 
     private:

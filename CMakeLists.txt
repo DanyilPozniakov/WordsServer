@@ -13,6 +13,7 @@ set(CMAKE_PREFIX_PATH "C:/Qt/6.8.0/msvc2022_64")
 
 find_package(Qt6 COMPONENTS Core Network REQUIRED)
 
+include_directories(external/json/include)
 
 add_subdirectory(Server)
 add_subdirectory(Server/Sockets)

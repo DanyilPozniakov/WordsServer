@@ -11,7 +11,7 @@
 #include <ws2tcpip.h>
 #include <string>
 
-#include <IEventHandler.h>
+class IEventHandler;
 
 constexpr int DEFAULT_BUFFER_SIZE = 1024 * 10; // 10KB
 

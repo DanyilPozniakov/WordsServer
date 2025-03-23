@@ -8,13 +8,25 @@
 #include <thread>
 #include <vector>
 
+#include "TaskManager.h"
 
 class WordsServer
 {
 public:
-    std::thread m_reactorThread;
-    std::vector<std::thread> m_workers;
+    WordsServer();
+    virtual ~WordsServer();
 
+    void Init();
+    void Run();
+    void Shutdown();
+
+    [[nodiscard]] TaskManager* GetTaskManager() const;
+
+    TaskManager* m_taskManager;
+
+
+private:
+    std::thread m_socketThread;
 };
 
 

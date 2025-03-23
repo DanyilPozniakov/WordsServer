@@ -9,9 +9,24 @@
 #include "ServerHandler.h"
 #include "TCPServerSocket.h"
 
+#include "../../WordsServer.h"
+
 WSADATA ISocket::wsaData = {};
 
-TCPServerSocket::TCPServerSocket(const std::string& ip, const std::string& port)
+Connection::Connection(SOCKET socket, IEventHandler* handler, TaskManager* taskManager)
+{
+    m_socket = socket;
+    m_handler.reset(handler);
+    m_handler->m_socket = socket;
+    m_clientName = std::string("Client_") + std::to_string(socket);
+}
+
+Connection::~Connection()
+{
+}
+
+TCPServerSocket::TCPServerSocket(const std::string& ip, const std::string& port, WordsServer* server)
+    : m_server(server)
 {
     ISocket::ip = ip;
     ISocket::port = port;
@@ -87,7 +102,7 @@ bool TCPServerSocket::Initialize()
         closesocket(m_listenSocket);
         return false;
     }
-    m_listener = std::make_pair(m_listenSocket, new ServerHandler());
+    m_listener = std::make_pair(m_listenSocket, std::make_unique<ServerHandler>(m_server->GetTaskManager()));
     std::cout << "[SERVER SOCKET] Server initialized" << std::endl;
     return true;
 }
@@ -133,7 +148,6 @@ void TCPServerSocket::eventLoop()
         FD_SET listener;
         FD_ZERO(&listener);
         FD_SET(m_listenSocket, &listener);
-
         {
             // Accepting logic
             timeval timeout = {0, 250};
@@ -158,7 +172,6 @@ void TCPServerSocket::eventLoop()
             FD_ZERO(&readSet);
             FD_ZERO(&writeSet);
             FD_ZERO(&errorSet);
-
 
             if (m_clientSockets.empty()) continue;
 

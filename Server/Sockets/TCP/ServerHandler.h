@@ -12,13 +12,14 @@
 #include "IEventHandler.h"
 
 
+class TaskManager;
 
 class Reactor;
 
 class ServerHandler : public IEventHandler
 {
 public:
-    ServerHandler();
+    explicit ServerHandler(TaskManager* reactor);
     ~ServerHandler() override;
 
     void HandleAccept(SOCKET socket, ISocket* reactor);
@@ -27,11 +28,12 @@ public:
     void HandleRead(SOCKET socket, ISocket* reactor) override;
     void HandleWrite(SOCKET socket, ISocket* reactor) override;
     void HandleError(SOCKET socket, ISocket* reactor) override;
-
+    bool HasDataToParse()   override;
     bool HasDataToSend() override;
 
+private:
+    TaskManager* m_taskManager;
 };
-
 
 
 #endif //SERVERHANDLER_H

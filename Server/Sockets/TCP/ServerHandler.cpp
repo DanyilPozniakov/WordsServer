@@ -7,8 +7,10 @@
 #include "ClientHandler.h"
 #include "ServerHandler.h"
 
-ServerHandler::ServerHandler()
+ServerHandler::ServerHandler(TaskManager* reactor)
+    : m_taskManager(reactor)
 {
+
 }
 
 ServerHandler::~ServerHandler()
@@ -33,7 +35,7 @@ void ServerHandler::HandleAccept(SOCKET socket, ISocket* reactor)
     std::cout << "[SERVER  E_HANDLER] New connection accepted: " << host << " on port: " << port << std::endl;
     u_long mode = 1;
     ioctlsocket(clientSock, FIONBIO, &mode); //Set socket to non-blocking mode
-    reactor->RegisterHandler(clientSock, new ClientHandler());
+    reactor->RegisterHandler(clientSock, new ClientHandler(m_taskManager));
 }
 
 void ServerHandler::HandleDisconnect(SOCKET socket, ISocket* reactor)
@@ -54,6 +56,12 @@ void ServerHandler::HandleWrite(SOCKET socket, ISocket* reactor)
 void ServerHandler::HandleError(SOCKET socket, ISocket* reactor)
 {
     std::cout << "[SERVER  E_HANDLER] ServerHandler::HandleError is not implemented" << std::endl;
+}
+
+bool ServerHandler::HasDataToParse()
+{
+    std::cout << "[SERVER  E_HANDLER] ServerHandler::HasDataToParse is not implemented" << std::endl;
+    return false;
 }
 
 bool ServerHandler::HasDataToSend()
