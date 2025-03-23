@@ -159,14 +159,12 @@ void TCPServerSocket::eventLoop()
             FD_ZERO(&writeSet);
             FD_ZERO(&errorSet);
 
+
             if (m_clientSockets.empty()) continue;
+
             for (const auto& sock : m_clientSockets)
             {
-                if(sock.first == INVALID_SOCKET)
-                {
-                    std::cerr << "[SERVER SOCKET] Invalid socket" << std::endl;
-                    continue;
-                }
+
                 FD_SET(sock.first, &readSet);
                 FD_SET(sock.first, &errorSet);
                 if(sock.second->HasDataToSend())
@@ -175,8 +173,7 @@ void TCPServerSocket::eventLoop()
                 }
             }
 
-
-            int result = select(0, &readSet, &writeSet, nullptr, &m_timeout);
+            int result = select(0, &readSet, &writeSet, &errorSet, &m_timeout);
             if (result == SOCKET_ERROR)
             {
                 std::cerr << "[SERVER SOCKET]-> eventLoop() -> select( read ) failed with error: " << WSAGetLastError()
@@ -184,19 +181,26 @@ void TCPServerSocket::eventLoop()
             }
             else if (result > 0)
             {
-                for (const auto& sock : m_clientSockets)
+               // if(m_clientSockets.empty()) continue;
+                for (auto socket = m_clientSockets.begin(); socket != m_clientSockets.end();)
                 {
-                    if (FD_ISSET(sock.first, &readSet))
+                    SOCKET m_sock = socket->first;
+                    auto current = socket++;
+                    if (FD_ISSET(current->first, &readSet))
                     {
-                        sock.second->HandleRead(sock.first, this);
+                        current->second->HandleRead(current->first, this);
                     }
-                    if (FD_ISSET(sock.first, &errorSet))
+                    if(m_clientSockets.find(m_sock) == m_clientSockets.end()) continue;
+
+                    if (FD_ISSET(current->first, &errorSet))
                     {
-                        sock.second->HandleError(sock.first, this);
+                        current->second->HandleError(current->first, this);
                     }
-                    if (FD_ISSET(sock.first, &writeSet))
+                    if(m_clientSockets.find(m_sock) == m_clientSockets.end()) continue;
+
+                    if (FD_ISSET(current->first, &writeSet))
                     {
-                        sock.second->HandleWrite(sock.first, this);
+                        current->second->HandleWrite(current->first, this);
                     }
                 }
             }

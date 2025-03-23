@@ -17,16 +17,22 @@ ClientHandler::~ClientHandler()
 void ClientHandler::HandleRead(SOCKET socket, ISocket* reactor)
 {
     int result = recv(socket, m_readBuffer.data(), DEFAULT_BUFFER_SIZE, 0);
-    if(result == SOCKET_ERROR)
+    if (result == SOCKET_ERROR)
     {
+        if (WSAGetLastError() == WSAECONNRESET)
+        {
+            std::cerr << "[CLIENT HANDLER][ERROR] HandleRead() -> connection reset by peer " << std::endl;
+            reactor->RemoveHandler(socket);
+            return;
+        }
         std::cerr << "[CLIENT HANDLER] HandleRead() -> recv failed with error: " << WSAGetLastError() << std::endl;
     }
-    else if(result == 0)
+    else if (result == 0)
     {
-        std::cerr << "[CLIENT HANDLER] HandleRead() -> connection closed" << std::endl;
+        std::cerr << "[CLIENT HANDLER] HandleRead() -> connection closed! " << std::endl;
         reactor->RemoveHandler(socket);
     }
-    else if(result > 0)
+    else if (result > 0)
     {
         m_readBuffer[result] = '\0';
         std::string data(m_readBuffer.data(), result);
@@ -45,6 +51,7 @@ void ClientHandler::HandleWrite(SOCKET socket, ISocket* reactor)
 
 void ClientHandler::HandleError(SOCKET socket, ISocket* reactor)
 {
+    std::cerr << "[CLIENT HANDLER] HandleError() -> error on socket: " << socket << std::endl;
 }
 
 bool ClientHandler::HasDataToSend()

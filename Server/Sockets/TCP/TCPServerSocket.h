@@ -11,6 +11,7 @@
 #include <array>
 #include <utility>
 #include <map>
+#include <vector>
 
 #include <IEventHandler.h>
 #include <ServerHandler.h>
@@ -39,7 +40,7 @@ public:
 
 private:
     std::pair<SOCKET, ServerHandler*>   m_listener;
-    std::map<SOCKET, IEventHandler*>    m_clientSockets;
+    std::map<SOCKET, IEventHandler*>    m_clientSockets; // maybe change to std::unordered_map
 
 
 
