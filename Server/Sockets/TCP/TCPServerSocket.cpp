@@ -107,6 +107,7 @@ bool TCPServerSocket::Initialize()
     return true;
 }
 
+
 void TCPServerSocket::Close()
 {
 }
@@ -127,6 +128,7 @@ void TCPServerSocket::RegisterHandler(SOCKET socket, IEventHandler* handler)
 
 }
 
+
 void TCPServerSocket::RemoveHandler(SOCKET socket)
 {
     auto handler = m_clientSockets[socket]->m_sessionId;
@@ -137,7 +139,7 @@ void TCPServerSocket::RemoveHandler(SOCKET socket)
 
 bool TCPServerSocket::IsOpen() const
 {
-    return true;
+    return true; // TODO:
 }
 
 void TCPServerSocket::eventLoop()

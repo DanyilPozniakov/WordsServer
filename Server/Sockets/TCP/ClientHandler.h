@@ -23,11 +23,14 @@ public:
     ~ClientHandler() override;
 
 
+
+
     void HandleRead(SOCKET socket, ISocket* reactor) override;
     void HandleWrite(SOCKET socket, ISocket* reactor) override;
     void HandleError(SOCKET socket, ISocket* reactor) override;
     bool HasDataToSend() override;
     bool HasDataToParse() override;
+
 
     void AddDataToSend(std::string data);
     std::string GetDataToSend();

@@ -25,6 +25,7 @@ public:
     TaskManager* m_taskManager;
 
 
+
 private:
     std::thread m_socketThread;
 };

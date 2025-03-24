@@ -17,6 +17,7 @@ class IEventHandler {
 public:
     virtual ~IEventHandler() = default;
 
+
     virtual void HandleRead(SOCKET socket, ISocket* reactor)        = 0;
     virtual void HandleWrite(SOCKET socket, ISocket* reactor)       = 0;
     virtual void HandleError(SOCKET socket, ISocket* reactor)       = 0;

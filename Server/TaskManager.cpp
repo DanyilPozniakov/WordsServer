@@ -11,6 +11,7 @@ TaskManager::TaskManager()
 {
 }
 
+
 TaskManager::~TaskManager()
 {
 }
@@ -20,6 +21,7 @@ void TaskManager::AddConnection(ClientHandler* connection)
     m_connections.push_back(connection);
     std::cout << "[TASK MANAGER]!!! Connection added" << std::endl;
 }
+
 
 bool TaskManager::CheckConnections()
 {

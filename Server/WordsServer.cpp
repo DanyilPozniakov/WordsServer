@@ -21,6 +21,8 @@ WordsServer::~WordsServer()
 
 }
 
+
+
 void WordsServer::Init()
 {
     m_taskManager = new TaskManager();

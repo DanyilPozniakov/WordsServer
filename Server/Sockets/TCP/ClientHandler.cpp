@@ -61,6 +61,7 @@ void ClientHandler::HandleWrite(SOCKET socket, ISocket* reactor)
 {
     if(HasDataToSend())
     {
+
         std::string data = GetDataToSend();
         int result = send(socket, data.c_str(), data.size(), 0);
         if (result == SOCKET_ERROR)

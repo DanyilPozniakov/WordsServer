@@ -26,6 +26,7 @@ void ServerHandler::HandleAccept(SOCKET socket, ISocket* reactor)
         std::cerr << "accept failed: " << WSAGetLastError() << std::endl;
         return;
     }
+
     //Creating and save a connection info
     char    host[NI_MAXHOST];
     int     port = ntohs(clientInfo.sin_port);

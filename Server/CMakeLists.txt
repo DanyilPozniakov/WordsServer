@@ -5,6 +5,7 @@ add_library(Server STATIC
         ThreadPool.h
         TaskManager.cpp
         TaskManager.h
+        Parser/IProtocolParser.h
 
 )
 

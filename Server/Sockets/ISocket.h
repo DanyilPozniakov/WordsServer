@@ -17,6 +17,7 @@ constexpr int DEFAULT_BUFFER_SIZE = 1024 * 10; // 10KB
 
 class ISocket
 {
+
 public:
     virtual ~ISocket() = default;
     virtual bool Initialize() = 0;
